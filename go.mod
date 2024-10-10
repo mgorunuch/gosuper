@@ -1,4 +1,4 @@
-module mgorunuch/gosuper
+module github.com/mgorunuch/gosuper
 
 go 1.23.1
 
