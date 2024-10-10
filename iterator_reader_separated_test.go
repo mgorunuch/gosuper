@@ -10,16 +10,16 @@ func TestNewReaderSeparatedIterator(t *testing.T) {
 	originalReader := strings.NewReader("a,b,c")
 	iter := NewReaderSeparatedIterator(originalReader, []byte(","))
 
-	for _, expected := range []string{"a", "b", "c"} {
-		actual, err := iter.Next()
+	for _, expected := range []byte{'a', 'b', 'c'} {
+		assert.True(t, iter.Next())
 
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
+		var actual []byte
+		err := iter.Scan(&actual)
 
-		assert.Equal(t, expected, string(actual))
+		assert.NoError(t, err)
+		assert.Equal(t, []byte{expected}, actual)
 	}
 
-	_, err := iter.Next()
-	assert.ErrorIs(t, err, ErrStopIteration)
+	assert.False(t, iter.Next())
+	assert.ErrorIs(t, iter.Scan(nil), ErrStopIteration)
 }

@@ -5,47 +5,39 @@ import (
 	"io"
 )
 
-// ErrEmptySeparator is returned when an empty separator is provided.
 var ErrEmptySeparator = errors.New("empty separator")
 
-// NewReaderSeparatedIterator creates a new ReaderSeparatedIterator for the given io.Reader and separator.
 func NewReaderSeparatedIterator(reader io.Reader, separator []byte) *ReaderSeparatedIterator {
 	return &ReaderSeparatedIterator{readerIter: ReaderIterator{reader: reader}, separator: separator}
 }
 
-// ReaderSeparatedIterator is an iterator implementation that separates input from an io.Reader based on a given separator.
 type ReaderSeparatedIterator struct {
 	readerIter ReaderIterator
 	separator  []byte
 	buf        []byte
 	similarN   int
+
+	curr []byte
+	err  error
 }
 
-// resetBuf resets the internal buffer and similarity counter.
 func (iter *ReaderSeparatedIterator) resetBuf() {
 	iter.buf = nil
 	iter.similarN = 0
 }
 
-// Next returns the next chunk of bytes up to the separator.
-// If there are no more chunks to read, it returns nil and ErrStopIteration.
-func (iter *ReaderSeparatedIterator) Next() ([]byte, error) {
+func (iter *ReaderSeparatedIterator) Next() bool {
 	defer iter.resetBuf()
 
-	for {
-		val, err := iter.readerIter.Next()
-		if err != nil {
-			if errors.Is(err, ErrStopIteration) {
-				if len(iter.buf) > 0 {
-					return iter.buf, nil
-				}
-			}
+	if iter.err != nil {
+		return false
+	}
 
-			return nil, err
-		}
-
-		if len(iter.separator) == 0 {
-			return nil, ErrEmptySeparator
+	for iter.readerIter.Next() {
+		var val byte
+		iter.err = iter.readerIter.Scan(&val)
+		if iter.err != nil {
+			return false
 		}
 
 		iter.buf = append(iter.buf, val)
@@ -56,7 +48,23 @@ func (iter *ReaderSeparatedIterator) Next() ([]byte, error) {
 		}
 
 		if iter.similarN == len(iter.separator) {
-			return iter.buf[:len(iter.buf)-len(iter.separator)], nil
+			iter.curr = iter.buf[:len(iter.buf)-len(iter.separator)]
+			return true
 		}
 	}
+
+	if len(iter.buf) > 0 {
+		iter.curr = iter.buf
+		return true
+	}
+
+	iter.err = ErrStopIteration
+	return false
+}
+
+func (iter *ReaderSeparatedIterator) Scan(b *[]byte) error {
+	if b != nil {
+		*b = iter.curr
+	}
+	return iter.err
 }

@@ -1,6 +1,7 @@
 package gosuper
 
 import (
+	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
 )
@@ -10,30 +11,18 @@ func TestReaderIterator_Next(t *testing.T) {
 	iter := ReaderIterator{reader: originalReader}
 
 	for _, expected := range []byte{'a', 'b', 'c'} {
-		actual, err := iter.Next()
+		assert.True(t, iter.Next())
 
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-		}
-		if expected != actual {
-			t.Errorf("expected %v, got %v", expected, actual)
-		}
-		if iter.reader != originalReader {
-			t.Errorf("unexpected reader change")
-		}
+		var actual byte
+		assert.NoError(t, iter.Scan(&actual))
+		assert.Equal(t, expected, actual)
 	}
 
-	_, err := iter.Next()
-	if err == nil {
-		t.Errorf("expected error, got nil")
-	}
+	assert.False(t, iter.Next())
+	assert.ErrorIs(t, iter.Scan(nil), ErrStopIteration)
 }
 
 func TestReaderIterator_Next_Empty(t *testing.T) {
 	iter := ReaderIterator{reader: strings.NewReader("")}
-
-	_, err := iter.Next()
-	if err == nil {
-		t.Errorf("expected error, got nil")
-	}
+	assert.False(t, iter.Next())
 }
