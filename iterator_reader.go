@@ -39,5 +39,6 @@ func (iter *ReaderIterator) Scan(b *byte) error {
 	if b != nil {
 		*b = iter.curr
 	}
+
 	return iter.err
 }
