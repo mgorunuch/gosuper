@@ -1,5 +1,9 @@
 package go_super
 
+func NewSliceIterator[Type any](slice []Type) *SliceIterator[Type] {
+	return &SliceIterator[Type]{slice: slice}
+}
+
 type SliceIterator[Type any] struct {
 	slice []Type
 }
