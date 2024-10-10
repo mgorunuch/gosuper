@@ -1,4 +1,4 @@
-package go_super
+package gosuper
 
 func NewSliceIterator[Type any](slice []Type) *SliceIterator[Type] {
 	return &SliceIterator[Type]{slice: slice}

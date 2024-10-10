@@ -1,4 +1,4 @@
-module mgorunuch/go-super
+module mgorunuch/gosuper
 
 go 1.23.1
 

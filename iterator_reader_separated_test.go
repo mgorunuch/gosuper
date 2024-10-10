@@ -1,4 +1,4 @@
-package go_super
+package gosuper
 
 import (
 	"github.com/stretchr/testify/assert"

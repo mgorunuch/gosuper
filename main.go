@@ -1,1 +1,1 @@
-package go_super
+package gosuper
