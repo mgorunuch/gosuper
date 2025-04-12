@@ -6,15 +6,19 @@ import (
 
 var SuperQueueNotValidTypeErr = errors.New("super queue not valid type")
 
-type SuperQueueConsumer[Type any] struct {
+type SuperQueueConsumer interface {
+	Consume(value any) error
+}
+
+type SuperQueueConsumerImpl[Type any] struct {
 	consumers []func(Type)
 }
 
-func (sqCons *SuperQueueConsumer[Type]) Add(consumers ...func(Type)) {
+func (sqCons *SuperQueueConsumerImpl[Type]) Add(consumers ...func(Type)) {
 	sqCons.consumers = append(sqCons.consumers, consumers...)
 }
 
-func (sqCons *SuperQueueConsumer[Type]) Consume(value any) (err error) {
+func (sqCons *SuperQueueConsumerImpl[Type]) Consume(value any) (err error) {
 	val, ok := value.(Type)
 	if !ok {
 		return SuperQueueNotValidTypeErr

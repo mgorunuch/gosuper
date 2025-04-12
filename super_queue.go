@@ -3,10 +3,10 @@ package gosuper
 import "errors"
 
 type SuperQueue struct {
-	consumers []SuperQueueConsumer[any]
+	consumers []SuperQueueConsumer
 }
 
-func (sq *SuperQueue) AddConsumer(consumer SuperQueueConsumer[any]) {
+func (sq *SuperQueue) AddConsumer(consumer SuperQueueConsumer) {
 	sq.consumers = append(sq.consumers, consumer)
 }
 
